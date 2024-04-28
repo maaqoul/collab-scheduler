@@ -1,0 +1,56 @@
+<div class="container mx-auto">
+  <!-- Table header with collaborator names -->
+  <div class="grid grid-cols-[auto_repeat(7,1fr)]">
+    <!-- Empty div for spacing -->
+    <div class="w-32"></div>
+    <!-- Collaborator names -->
+    <div
+      *ngFor="let collaborator of collaborators"
+      class="border p-6 text-center"
+    >
+      {{ collaborator.name }}
+    </div>
+  </div>
+
+  <!-- Table body with timeline and time slots -->
+  <div class="flex">
+    <!-- Timeline column -->
+    <div class="w-32 flex flex-col border-r">
+      <!-- Time slots with border on the right -->
+      <div
+        *ngFor="let time of timeSlots"
+        class="border-b border-r p-6 text-center"
+      >
+        {{ time }}
+      </div>
+    </div>
+
+    <!-- Collaborator columns, each is a self-contained grid -->
+    <div class="grid grid-cols-7 flex-1">
+      <ng-container
+        *ngFor="let collaborator of collaborators; let colIndex = index"
+      >
+        <!-- Individual grid for each collaborator's column -->
+        <div class="flex flex-col border-r">
+          <!-- Individual time slots -->
+          <div
+            *ngFor="let time of timeSlots; let rowIndex = index"
+            class="border-b p-9 text-center relative"
+          >
+            <!-- Place the activity in the correct timeslot -->
+            <ng-container *ngFor="let activity of collaborator.activities">
+              <div
+                *ngIf="isActivityInTimeslot(activity, rowIndex + startTime)"
+                [style.height.px]="getActivityHeight(activity)"
+                [ngClass]="activity.color"
+                class="absolute inset-0 flex items-center justify-center"
+              >
+                {{ activity.description }}
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
