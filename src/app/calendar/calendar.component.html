@@ -2,55 +2,69 @@
   <!-- Table header with collaborator names -->
   <div class="grid grid-cols-[auto_repeat(7,1fr)]">
     <!-- Empty div for spacing -->
-    <div class="w-32"></div>
+    <div class="w-32 h-16"></div>
     <!-- Collaborator names -->
-    <div
-      *ngFor="let collaborator of collaborators"
-      class="border p-6 text-center"
-    >
+    @for(collaborator of collaborators; track collaborator.id){
+    <div class="border text-center h-16">
       {{ collaborator.name }}
     </div>
+    }
   </div>
 
   <!-- Table body with timeline and time slots -->
   <div class="flex">
     <!-- Timeline column -->
-    <div class="w-32 flex flex-col border-r">
+    <div class="w-32 flex flex-col">
       <!-- Time slots with border on the right -->
-      <div
-        *ngFor="let time of timeSlots"
-        class="border-b border-r p-6 text-center"
-      >
+      @for(time of timeSlots; track time){
+      <div class="border-b border-r text-center h-16">
         {{ time }}
       </div>
+      }
     </div>
 
     <!-- Collaborator columns, each is a self-contained grid -->
-    <div class="grid grid-cols-7 flex-1">
-      <ng-container
-        *ngFor="let collaborator of collaborators; let colIndex = index"
-      >
+    <div class="grid grid-cols-7 flex-1 relative" cdkDropListGroup>
+      @for(collaborator of collaborators; track collaborator.id){
+      <ng-container>
         <!-- Individual grid for each collaborator's column -->
-        <div class="flex flex-col border-r">
+        <div class="flex flex-col">
           <!-- Individual time slots -->
+          @for(time of timeSlots; track time){
           <div
-            *ngFor="let time of timeSlots; let rowIndex = index"
-            class="border-b p-9 text-center relative"
+            cdkDropList
+            [id]="getDropListIdForCollaborator(collaborator.id, time)"
+            cdkDropList
+            [cdkDropListData]="
+              activitiesInTimeSlot(time, collaborator.activities)
+            "
+            [cdkDropListConnectedTo]="
+              getAllDropListIdsForCollaborator(collaborator.id)
+            "
+            (cdkDropListDropped)="drop($event)"
+            class="border-b border-r text-center h-16"
           >
-            <!-- Place the activity in the correct timeslot -->
-            <ng-container *ngFor="let activity of collaborator.activities">
+            @for(activity of collaborator.activities; track trackActivity){
+            <ng-container>
+              @if(isActivityInTimeSlot(activity, time)){
               <div
-                *ngIf="isActivityInTimeslot(activity, rowIndex + startTime)"
-                [style.height.px]="getActivityHeight(activity)"
-                [ngClass]="activity.color"
-                class="absolute inset-0 flex items-center justify-center"
+                cdkDrag
+                [ngStyle]="{
+                  top: calculateTopPosition(activity),
+                  height: calculateHeight(activity)
+                }"
+                class="absolute w-[200px] cursor-move"
+                [class]="activity.color"
               >
-                {{ activity.description }}
+                <span>{{ activity.description }}</span>
               </div>
+              }
             </ng-container>
+            }
           </div>
-        </div>
-      </ng-container>
+          }
+        </div> </ng-container
+      >}
     </div>
   </div>
 </div>
